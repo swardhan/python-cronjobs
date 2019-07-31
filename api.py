@@ -15,11 +15,11 @@ default_time = {
 }
 
 user_time = {
-	"minute": "0",
-	"hour": "0",
-	"dom": "0",
-	"mon": "0",
-	"dow": "0"
+	"minute": "*",
+	"hour": "*",
+	"dom": "*",
+	"mon": "*",
+	"dow": "*"
 }
 
 command = "mongodump"
@@ -34,7 +34,7 @@ def index():
 def start_backup():
 	ret_val = start()
 	if ret_val:		
-		return jsonify({"result": "Backup Already Running"})
+		return jsonify({"result": "Default Backup Already Running"})
 	else:		
 		return jsonify({"result": "Started at %s" % default_time})
 
@@ -50,13 +50,16 @@ def stop_backup():
 	if ret_val:		
 		return jsonify({"result": "Stopped #%s" % request_comment})
 	else:
-		return jsonify({"result": "Error occured"})
+		return jsonify({"result": "Running job for Backup not Found"})
 
 
 @app.route('/db/change_time', methods=['POST'])
 def change():
-	change_time(user_time=user_time)
-	return "Change Time"
+	data = request.get_json()
+	request_time = data["user_time"]
+	print(request_time)
+	change_time(time=request_time)
+	return jsonify({"result": "Started Job for Another Backup at #%s" % request_time})
 
 if __name__ == '__main__':
 	app.run(port=5000, debug=True)
